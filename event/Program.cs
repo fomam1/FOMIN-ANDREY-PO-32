@@ -152,9 +152,6 @@ class Program
         Helper.Swap(ref p1, ref p2);
         Console.WriteLine("После Swap: " + p1.Name + ", " + p2.Name);
 
-        // Ошибка CS0311: int и string не наследуют Entity
-        // Repository<int> r = new Repository<int>();
-
         Console.ReadLine();
     }
 }
