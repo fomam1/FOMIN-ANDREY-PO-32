@@ -1,0 +1,160 @@
+﻿using System;
+using System.Collections.Generic;
+
+abstract class Entity
+{
+    public int Id { get; protected set; }
+    public string Name { get; protected set; }
+
+    protected Entity()
+    {
+        Name = "";
+    }
+
+    protected Entity(int id, string name)
+    {
+        Id = id;
+        Name = name;
+    }
+
+    public abstract string Category { get; }
+    public abstract string GetEntityDetails();
+
+    public void PrintSummary()
+    {
+        Console.WriteLine(Category + " | " + Id + " | " + Name);
+    }
+}
+
+class UserEntity : Entity
+{
+    public string Email { get; set; } = "";
+    public string Role { get; set; } = "";
+
+    public UserEntity() { }
+
+    public UserEntity(int id, string name, string email, string role) : base(id, name)
+    {
+        Email = email;
+        Role = role;
+    }
+
+    public override string Category
+    {
+        get { return "Пользователи"; }
+    }
+
+    public override string GetEntityDetails()
+    {
+        return "Пользователь #" + Id + ": " + Name + ", Email: " + Email + ", Роль: " + Role;
+    }
+}
+
+class ProductEntity : Entity
+{
+    public double Price { get; set; }
+    public int StockQuantity { get; set; }
+
+    public ProductEntity() { }
+
+    public ProductEntity(int id, string name, double price, int stockQuantity) : base(id, name)
+    {
+        Price = price;
+        StockQuantity = stockQuantity;
+    }
+
+    public override string Category
+    {
+        get { return "Товары"; }
+    }
+
+    public override string GetEntityDetails()
+    {
+        return "Товар #" + Id + ": " + Name + ", Цена: " + Price + ", Остаток: " + StockQuantity;
+    }
+}
+
+class Repository<T> where T : Entity, new()
+{
+    private List<T> items = new List<T>();
+
+    public int Count
+    {
+        get { return items.Count; }
+    }
+
+    public void Add(T item)
+    {
+        items.Add(item);
+    }
+
+    public T GetAt(int index)
+    {
+        return items[index];
+    }
+
+    public List<T> GetAll()
+    {
+        return items;
+    }
+
+    public T? FindById(int id)
+    {
+        foreach (T item in items)
+        {
+            if (item.Id == id)
+                return item;
+        }
+        return null;
+    }
+
+    public void PrintAllDetails()
+    {
+        foreach (T item in items)
+        {
+            Console.WriteLine(item.GetEntityDetails());
+        }
+    }
+}
+
+static class Helper
+{
+    public static void Swap<TValue>(ref TValue a, ref TValue b)
+    {
+        TValue temp = a;
+        a = b;
+        b = temp;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Repository<UserEntity> users = new Repository<UserEntity>();
+        users.Add(new UserEntity(1, "Администратор Иван", "ivan@mail.com", "Admin"));
+        users.Add(new UserEntity(2, "Менеджер Анна", "anna@mail.com", "User"));
+
+        Repository<ProductEntity> products = new Repository<ProductEntity>();
+        products.Add(new ProductEntity(1, "Ноутбук", 450000, 5));
+        products.Add(new ProductEntity(2, "Мышь", 8000, 30));
+        products.Add(new ProductEntity(3, "Клавиатура", 15000, 12));
+
+        users.PrintAllDetails();
+        products.PrintAllDetails();
+
+        ProductEntity? found = products.FindById(2);
+        if (found != null)
+            Console.WriteLine("Найдено: " + found.GetEntityDetails());
+
+        ProductEntity p1 = products.GetAt(0);
+        ProductEntity p2 = products.GetAt(1);
+        Helper.Swap(ref p1, ref p2);
+        Console.WriteLine("После Swap: " + p1.Name + ", " + p2.Name);
+
+        // Ошибка CS0311: int и string не наследуют Entity
+        // Repository<int> r = new Repository<int>();
+
+        Console.ReadLine();
+    }
+}
